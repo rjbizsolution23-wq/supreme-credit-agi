@@ -252,6 +252,7 @@ AUTONOMOUS MASTER PROTOCOL:
   1. IMMEDIATELY perform a 10-Point Forensic FCRA/Metro 2® Audit.
   2. FOLLOW with a complete 10-Point Credit Success Roadmap (30/60/90 Day execution plan).
   3. CONCLUDE by drafting the first set of "Cross-Logic" dispute letters for the identified violations.
+- REPORT-FIRST RULE: Use ONLY the provided report data (RAG context). Bypassing generic user input is mandatory.
 - Structure this as one comprehensive, multi-part master report.
 - Maintain attorney-grade fidelity and e-OSCAR bypass prose throughout.
 
@@ -415,8 +416,12 @@ async function sendMessage(override, regen=false) {
   // RAG retrieval
   let ragContext=''; let ragUsed=false;
   if(STATE.ragEnabled && STATE.ragChunks.length && text) {
-    const relevant = retrieveRAG(text, 4);
-    if(relevant.length) { ragContext=`\n\n[KNOWLEDGE BASE CONTEXT]\n${relevant.map((c,i)=>`[Doc ${i+1}] ${c.text}`).join('\n\n')}\n[END CONTEXT]\n`; ragUsed=true; }
+    const isElite = text.includes('[AUTONOMOUS INTAKE PROTOCOL ACTIVATED]') || text.includes('[ACTIVATE METRO 2® ELITE PROTOCOL:');
+    const relevant = isElite ? retrieveHighDensityRAG(50) : retrieveRAG(text, 5);
+    if(relevant.length) { 
+      ragContext=`\n\n[UPLOADED CREDIT REPORT DATA - PRIORITY SOURCE]\n${relevant.map((c,i)=>`[Chunk ${i+1}] ${c.text}`).join('\n\n')}\n[END REPORT DATA]\n`; 
+      ragUsed=true; 
+    }
   }
 
   // Orchestrate
@@ -656,6 +661,14 @@ function retrieveRAG(query, topK=4) {
   const qEmbed = simpleEmbed(query);
   return STATE.ragChunks.map(c=>({...c,score:cosineSim(qEmbed,simpleEmbed(c.text))}))
     .filter(c=>c.score>0.01).sort((a,b)=>b.score-a.score).slice(0,topK);
+}
+
+function retrieveHighDensityRAG(topK=50) {
+  // For autonomous intake, we want the most significant chunks of the report
+  // If the total chunks are fewer than topK, return all
+  if (STATE.ragChunks.length <= topK) return STATE.ragChunks;
+  // Otherwise, take a representation (first few and then based on key terms)
+  return STATE.ragChunks.slice(0, topK);
 }
 
 function updateRAGUI() {
