@@ -74,9 +74,14 @@ const LETTER_TYPES = [
 ];
 
 const QUICK_ACTIONS = [
-  '⚖️ Run FCRA Violation Scan','📋 Generate Dispute Letter','🗺️ Financial Roadmap',
-  '📊 Score Impact Analysis','⚡ 30/60/90 Day Plan','🎯 Goodwill Letter',
-  '🔍 Account Deep Dive','📜 Court Document Draft',
+  { label: '⚖️ Run FCRA Violation Scan', cat: 'analysis', id: 'v1' },
+  { label: '📋 Generate Dispute Letter', cat: 'disputes', id: 'd1' },
+  { label: '🗺️ Financial Roadmap', cat: 'roadmaps', id: 'r1' },
+  { label: '📊 Score Impact Analysis', cat: 'analysis', id: 'v2' },
+  { label: '⚡ 30/60/90 Day Plan', cat: 'roadmaps', id: 'r1' },
+  { label: '🎯 Goodwill Letter', cat: 'disputes', id: 'd3' },
+  { label: '🔍 Account Deep Dive', cat: 'analysis', id: 'v3' },
+  { label: '📜 Court Document Draft', cat: 'legal', id: 'l2' },
 ];
 
 const SUGGESTIONS = [
@@ -136,8 +141,8 @@ function buildQuickActions() {
   const qa = $('quick-actions');
   qa.innerHTML = '';
   QUICK_ACTIONS.forEach(a => {
-    const c = el('button', 'quick-chip', a);
-    c.onclick = () => useSuggestion(a);
+    const c = el('button', 'quick-chip', a.label);
+    c.onclick = () => usePrompt(a.cat, a.id);
     qa.appendChild(c);
   });
 }
@@ -998,11 +1003,12 @@ function usePrompt(categoryKey, promptId) {
     const instruction = `[ACTIVATE METRO 2® ELITE PROTOCOL: ${prompt.name}]\n\nReference Template Strategy:\n${prompt.fullPrompt}\n\nTask: Generate a 100% unique, context-aware response based on the currently analyzed credit report data. Priority: e-OSCAR bypass and manual review triggers.`;
     
     input.value = instruction;
-    closeModal('prompt-library-modal');
+    const modal = $('prompt-library-modal');
+    if (modal) closeModal('prompt-library-modal');
     input.focus();
     
-    // Simulate enter press to trigger generation automatically
-    handleUserInput();
+    // Trigger generation automatically
+    sendMessage();
     showToast('AI Generation Started...', 'success');
   }
 }
