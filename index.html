@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Supreme Credit Master AGI V17.0 — MRT ELITE</title>
+<meta name="description" content="Supreme Credit Master AGI V15 by Rick Jefferson, RJ Business Solutions. Military-grade FCRA violation detection, attorney-level dispute letters, and personalized financial roadmaps powered by Gemini AI."/>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&family=Sora:wght@700;800&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css"/>
+<link rel="stylesheet" href="credit_agi.css"/>
+</head>
+<body>
+
+<!-- Loading Overlay -->
+<div id="loading-overlay">
+  <img class="loader-logo" src="https://media.rickjeffersonsolutions.com/rj-business-solutions-logo-banner.jpg" alt="RJ Business Solutions"/>
+  <div class="loader-text">Supreme Credit Master AGI</div>
+  <div class="loader-sub" style="color:#d4a017;font-weight:700;letter-spacing:.1em;">V17.0 MRT ELITE ENGINE</div>
+  <div class="loader-sub pulse" style="margin-top:4px;">Bypassing e-OSCAR Automation · Rick Jefferson</div>
+  <div class="loader-bar"><div class="loader-bar-fill"></div></div>
+</div>
+
+<!-- App Shell -->
+<div id="app">
+
+  <!-- ═══ SIDEBAR ═══ -->
+  <aside id="sidebar">
+    <div class="sidebar-header">
+      <!-- Logo -->
+      <div class="brand">
+        <img class="brand-logo"
+             src="https://media.rickjeffersonsolutions.com/rj-business-solutions-logo-banner.jpg"
+             alt="RJ Business Solutions"
+             onerror="this.style.display='none'"/>
+        <div class="brand-version">Supreme Credit Master AGI <span>V17.0</span></div>
+        <div class="brand-tagline">MRT ELITE by Rick Jefferson</div>
+      </div>
+      <button class="btn-new-chat" onclick="newChat()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        New Chat Session
+      </button>
+    </div>
+
+    <!-- Model Selector -->
+    <div class="model-panel">
+      <div class="model-panel-label">🤖 AI Model</div>
+      <div class="model-grid" id="model-grid"></div>
+    </div>
+
+    <!-- Orchestration Mode -->
+    <div class="sidebar-section">
+      <div class="sidebar-section-label">⚡ Orchestration Mode</div>
+      <div style="display:flex;gap:5px;">
+        <button class="model-chip orch-btn active" data-mode="single" style="flex:1">Single</button>
+        <button class="model-chip orch-btn" data-mode="dual" style="flex:1">Dual AI</button>
+        <button class="model-chip orch-btn" data-mode="triple" style="flex:1">Triple AI</button>
+      </div>
+    </div>
+
+    <!-- Nav -->
+    <div class="sidebar-section">
+      <div class="sidebar-section-label">🛠️ Legal Tools</div>
+      <div class="nav-item active" onclick="useSuggestion('Run a comprehensive military-grade FCRA violation scan on my credit report covering all 10 violation categories with damage calculations.')">
+        <span>⚖️</span> FCRA Violation Scanner
+      </div>
+      <div class="nav-item" onclick="openDisputeModal()">
+        <span>📋</span> Dispute Letter Generator
+      </div>
+      <div class="nav-item" onclick="openRoadmapModal()">
+        <span>🗺️</span> Financial Roadmap
+      </div>
+      <div class="nav-item" onclick="useSuggestion('Draft a federal FCRA pre-litigation demand letter for willful violations under 15 U.S.C. §1681n with specific damage calculations.')">
+        <span>📜</span> Court Document Drafter
+      </div>
+      <div class="nav-item" onclick="useSuggestion('Analyze my credit report and provide a complete score impact analysis with specific actionable steps to maximize points gained in 30 days.')">
+        <span>📊</span> Score Impact Analysis
+      </div>
+      <div class="nav-item" onclick="useSuggestion('Generate a complete 30-60-90 day credit restoration action plan with weekly milestones.')">
+        <span>⚡</span> 30/60/90-Day Action Plan
+      </div>
+      <div class="nav-item" onclick="useSuggestion('Write a goodwill adjustment letter requesting late payment removal based on my positive history.')">
+        <span>🤝</span> Goodwill Letter
+      </div>
+    </div>
+
+    <!-- Chat History -->
+    <div class="sidebar-section">
+      <div class="sidebar-section-label">💬 Chat History</div>
+    </div>
+    <div id="chat-history"></div>
+
+    <!-- RAG Panel -->
+    <div id="rag-panel">
+      <div class="rag-panel-header" onclick="toggleRagPanel()">
+        <div class="rag-panel-title">
+          <div class="rag-status-dot" id="rag-status-dot"></div>
+          📂 Knowledge Base
+        </div>
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+      </div>
+      <div id="rag-panel-body">
+        <div class="rag-dropzone" id="rag-dropzone" onclick="document.getElementById('rag-file-input').click()">
+          📁 Drop credit reports, PDFs, or docs<br/>
+          <small style="color:var(--text-dim);font-size:10px;">PDF · TXT · CSV · JSON</small>
+        </div>
+        <input type="file" id="rag-file-input" multiple accept=".pdf,.txt,.csv,.json,.md" style="display:none"/>
+        <div class="rag-progress" id="rag-progress">
+          <div class="rag-progress-bar"></div>
+        </div>
+        <div class="rag-stats">
+          <span>📄 <span id="rag-doc-count">0</span> docs</span>
+          <span>🔢 <span id="rag-chunk-count">0</span> chunks</span>
+          <button style="background:none;border:none;color:var(--danger);cursor:pointer;font-size:10px;margin-left:auto;" onclick="clearRAG()">Clear All</button>
+        </div>
+        <div id="rag-doc-list"></div>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="sidebar-footer">
+      <button class="btn-sidebar-action" onclick="openSettings()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/></svg>
+        Settings &amp; API Key
+      </button>
+      <button class="btn-sidebar-action" onclick="exportChat()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        Export Session
+      </button>
+      <button class="nav-item" onclick="openPromptLibrary()">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
+        <span>Elite Prompt Library</span>
+        <span class="badge-new">2026</span>
+      </button>
+      <button class="btn-sidebar-action" onclick="toggleTheme()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/></svg>
+        Toggle Theme
+      </button>
+      <!-- Infra Status -->
+      <div class="infra-status">
+        <div class="infra-status-item"><span class="infra-dot" style="background:#f59e0b"></span> METRO 2 ELITE</div>
+        <div class="infra-status-item"><span class="infra-dot" style="background:#ef4444"></span> MRT BYPASS</div>
+        <div class="infra-status-item"><span class="infra-dot" style="background:#00b4f5"></span> CLOUDFLARE</div>
+        <div class="infra-status-item"><span class="infra-dot" style="background:#5f83ef"></span> CLERK</div>
+      </div>
+      <!-- Brand Footer -->
+      <div style="margin-top:8px;padding-top:8px;border-top:1px solid var(--border);text-align:center;">
+        <div style="font-size:9px;color:var(--text-dim);font-family:var(--font-mono);">© 2026 RJ Business Solutions</div>
+        <div style="font-size:9px;color:var(--text-dim);">V17.0 MRT ELITE</div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ═══ MAIN ═══ -->
+  <main id="main">
+    <!-- Topbar -->
+    <header id="topbar">
+      <div class="topbar-left">
+        <button id="btn-toggle-sidebar" onclick="toggleSidebar()" title="Toggle Sidebar (Ctrl+\)">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+        </button>
+        <img class="topbar-logo"
+             src="https://media.rickjeffersonsolutions.com/rj-business-solutions-logo-banner.jpg"
+             alt="RJ Business Solutions"
+             onerror="this.style.display='none'"/>
+        <span class="topbar-title">Supreme Credit Master AGI</span>
+        <span class="topbar-badge">V17.0 MRT ELITE</span>
+        <span class="topbar-badge-gold">e-OSCAR BYPASS ENABLED</span>
+      </div>
+      <div class="topbar-right">
+        <div class="topbar-model-display" id="current-model-display">2.5 Pro</div>
+        <button class="icon-btn" onclick="openDisputeModal()" title="Dispute Letter">
+          📋<span class="tooltip">Generate Dispute Letter</span>
+        </button>
+        <button class="icon-btn" onclick="openRoadmapModal()" title="Roadmap">
+          🗺️<span class="tooltip">Financial Roadmap</span>
+        </button>
+        <button class="icon-btn" onclick="exportChat()" title="Export">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          <span class="tooltip">Export Session</span>
+        </button>
+        <button class="icon-btn" onclick="openSettings()" title="Settings">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/></svg>
+          <span class="tooltip">Settings</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- FCRA Violation Mode Bar -->
+    <div id="violation-mode-bar">
+      <span class="vmode-label">⚖️ FCRA Focus:</span>
+      <div id="violation-bar-items" style="display:flex;gap:5px;flex-wrap:wrap;"></div>
+    </div>
+
+    <!-- MFSN Banner -->
+    <div id="mfsn-banner">
+      <div class="mfsn-text">
+        📊 <strong>Get all 3 bureau credit scores + real-time monitoring</strong> — Exclusive <strong>$1 trial for 7 days</strong> via RJ Business Solutions
+      </div>
+      <div class="mfsn-cta-group">
+        <a class="mfsn-btn primary" href="https://myfreescorenow.com/enroll/?AID=RickJeffersonSolutions&PID=49914" target="_blank" rel="noopener">Start $1 Trial →</a>
+        <button class="mfsn-btn secondary" onclick="dismissMFSN()">Learn More</button>
+      </div>
+      <button id="mfsn-dismiss" onclick="dismissMFSN()" title="Dismiss">×</button>
+    </div>
+
+    <!-- Chat Container -->
+    <div id="chat-container">
+      <!-- Welcome Screen -->
+      <div id="welcome-screen">
+        <img class="welcome-logo"
+             src="https://media.rickjeffersonsolutions.com/rj-business-solutions-logo-banner.jpg"
+             alt="RJ Business Solutions"
+             onerror="this.style.display='none'"/>
+        <h1 class="welcome-title">Supreme Credit Master AGI</h1>
+        <div class="welcome-v">VERSION 17.0 · MRT ELITE DISPUTE ENGINE</div>
+        <p class="welcome-sub">e-OSCAR BYPASS · METRO 2 2025 SUCCESS · FCRA SUPREMACY — <strong style="color:var(--primary-light);">by Rick Jefferson, RJ Business Solutions</strong></p>
+        <div class="welcome-stats">
+          <div class="welcome-stat"><div class="welcome-stat-val">15 U.S.C.</div><div class="welcome-stat-label">FCRA Authority</div></div>
+          <div class="welcome-stat"><div class="welcome-stat-val">10</div><div class="welcome-stat-label">Violation Categories</div></div>
+          <div class="welcome-stat"><div class="welcome-stat-val">8</div><div class="welcome-stat-label">Letter Types</div></div>
+          <div class="welcome-stat"><div class="welcome-stat-val">V17.0</div><div class="welcome-stat-label">MRT ELITE</div></div>
+        </div>
+        <div class="suggestion-grid" id="suggestion-grid"></div>
+      </div>
+
+      <!-- Message List -->
+      <div id="chat-messages" class="hidden"></div>
+
+      <!-- Typing Indicator -->
+      <div id="typing-indicator">
+        <div class="typing-bubble">
+          <div class="typing-dots">
+            <div class="typing-dot"></div>
+            <div class="typing-dot"></div>
+            <div class="typing-dot"></div>
+          </div>
+          <span>Bypassing e-OSCAR automation with</span>
+          <span class="typing-model-name" id="typing-model-name">Gemini 1.5 Pro</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Input Area -->
+    <div id="input-area">
+      <div class="quick-actions" id="quick-actions"></div>
+      <div id="image-preview-container">
+        <img id="image-preview" alt="Attachment"/>
+        <button id="btn-remove-image" onclick="clearImageAttachment()">×</button>
+      </div>
+      <div class="input-box">
+        <textarea id="user-input" placeholder="Ask about FCRA violations, dispute letters, financial roadmaps, or paste your credit report..." rows="1" maxlength="16000"></textarea>
+        <div class="input-actions">
+          <button class="input-icon-btn" id="btn-attach-image" title="Attach image" style="font-size:16px;">📎</button>
+          <button class="input-icon-btn" onclick="document.getElementById('rag-file-input').click()" title="Add to Knowledge Base" style="font-size:16px;">📁</button>
+          <button id="btn-send" title="Send (Enter)">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+          </button>
+        </div>
+      </div>
+      <div class="input-footer">
+        <span class="input-shortcuts"><kbd>Enter</kbd> send · <kbd>Shift+Enter</kbd> newline · <kbd>Ctrl+K</kbd> new chat · <kbd>Ctrl+/</kbd> focus</span>
+        <span id="char-counter">0/16000</span>
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- ═══ MODALS ═══ -->
+
+<!-- Settings Modal -->
+<div class="modal-overlay" id="settings-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <h2 class="modal-title">⚙️ Settings — Supreme Credit Master AGI V15</h2>
+      <button class="modal-close" onclick="closeSettings()">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="settings-section">
+        <div class="settings-section-title">🔑 API Configuration</div>
+        <div class="form-group">
+          <label class="form-label">Gemini API Key</label>
+          <input type="password" class="form-input" id="api-key-input" placeholder="AIzaSy..."/>
+        </div>
+      </div>
+      <div class="settings-section">
+        <div class="settings-section-title">🤖 Generation Parameters</div>
+        <div class="form-group">
+          <label class="form-label">Temperature <span class="range-display" id="temp-display">0.7</span></label>
+          <input type="range" class="form-range" id="temp-slider" min="0" max="1" step="0.1" value="0.7"/>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Max Output Tokens</label>
+          <input type="number" class="form-input" id="max-tokens-input" value="8192" min="256" max="32768" step="256"/>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Context Window (message pairs)</label>
+          <input type="number" class="form-input" id="context-turns-input" value="10" min="1" max="50"/>
+        </div>
+      </div>
+      <div class="settings-section">
+        <div class="settings-section-title">👤 Client Information</div>
+        <div class="form-group">
+          <label class="form-label">Client Full Name</label>
+          <input type="text" class="form-input" id="client-name" placeholder="Full legal name for dispute letters"/>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Client Mailing Address</label>
+          <input type="text" class="form-input" id="client-address" placeholder="Street, City, State ZIP"/>
+        </div>
+        <div class="form-group">
+          <label class="form-label">State (for state-specific laws)</label>
+          <input type="text" class="form-input" id="client-state" placeholder="e.g., NM, CA, TX"/>
+        </div>
+      </div>
+      <div class="settings-section">
+        <div class="settings-section-title">📝 Custom Instructions</div>
+        <div class="form-group">
+          <textarea class="form-input" id="custom-instructions" placeholder="Additional guidance (e.g., focus on mortgage readiness, always cite state law, use formal tone)..."></textarea>
+        </div>
+      </div>
+      <div class="settings-section">
+        <div class="settings-section-title">🔧 Features</div>
+        <div class="toggle-row">
+          <div class="toggle-info"><div class="toggle-label">Streaming Responses</div><div class="toggle-desc">Real-time token streaming for faster feedback</div></div>
+          <label class="toggle"><input type="checkbox" id="toggle-streaming" checked/><span class="toggle-slider"></span></label>
+        </div>
+        <div class="toggle-row">
+          <div class="toggle-info"><div class="toggle-label">RAG Knowledge Base</div><div class="toggle-desc">Ground responses in your uploaded documents</div></div>
+          <label class="toggle"><input type="checkbox" id="toggle-rag" checked/><span class="toggle-slider"></span></label>
+        </div>
+        <div class="toggle-row">
+          <div class="toggle-info"><div class="toggle-label">Auto-Scroll</div><div class="toggle-desc">Follow response as it streams</div></div>
+          <label class="toggle"><input type="checkbox" id="toggle-autoscroll" checked/><span class="toggle-slider"></span></label>
+        </div>
+        <div class="toggle-row">
+          <div class="toggle-info"><div class="toggle-label">Dynamic Thinking (Gemini 3)</div><div class="toggle-desc">Enable advanced reasoning depth controls</div></div>
+          <label class="toggle"><input type="checkbox" id="toggle-thinking" checked/><span class="toggle-slider"></span></label>
+        </div>
+        <div class="form-group" style="padding: 0 12px 12px 12px;">
+          <label class="form-label">Thinking Level</label>
+          <select class="form-input" id="thinking-level-select">
+            <option value="minimal">Minimal (Faster)</option>
+            <option value="low">Low</option>
+            <option value="medium">Medium</option>
+            <option value="high" selected>High (Deepest Reasoning)</option>
+          </select>
+        </div>
+        <div class="toggle-row">
+          <div class="toggle-info"><div class="toggle-label">Real-Time Legal Verification</div><div class="toggle-desc">Include today's date in all documents</div></div>
+          <label class="toggle"><input type="checkbox" id="toggle-legal" checked/><span class="toggle-slider"></span></label>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-secondary" onclick="resetSettings()" style="background:var(--danger);color:#fff;margin-right:auto;">⚠️ Reset System</button>
+        <button class="btn-secondary" onclick="closeSettings()">Cancel</button>
+        <button class="btn-primary" onclick="saveSettings()">💾 Save Settings</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Dispute Letter Modal -->
+<div class="modal-overlay" id="dispute-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <h2 class="modal-title">📋 Dispute Letter Generator — V15</h2>
+      <button class="modal-close" onclick="closeDisputeModal()">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="settings-section-title" style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--primary-light);margin-bottom:12px;padding-bottom:6px;border-bottom:1px solid var(--border);">Select Letter Type</div>
+      <div class="letter-type-grid" id="letter-type-grid"></div>
+      <div class="form-group">
+        <label class="form-label">Account / Creditor Name</label>
+        <input type="text" class="form-input" id="dispute-account-name" placeholder="e.g., Capital One, Equifax, LVNV Funding LLC"/>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Dispute Issues &amp; FCRA Violations</label>
+        <textarea class="form-input" id="dispute-issues" placeholder="e.g., Account not mine, balance incorrect ($2,400 vs $0 actual), listed as open (paid/closed), §1681i reinvestigation failure, §1681e(b) inaccuracy..."></textarea>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Dispute Round</label>
+        <select class="form-input" id="dispute-round">
+          <option value="1">Round 1 — Initial Dispute (30-day deadline)</option>
+          <option value="2">Round 2 — Escalated Follow-Up (Failure to reinvestigate)</option>
+          <option value="3">Round 3 — Final Demand / Pre-Litigation Notice</option>
+        </select>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-secondary" onclick="closeDisputeModal()">Cancel</button>
+        <button class="btn-primary" onclick="generateDisputeLetter()">⚖️ Generate Letter</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Roadmap Modal -->
+<div class="modal-overlay" id="roadmap-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <h2 class="modal-title">🗺️ Financial Roadmap Generator</h2>
+      <button class="modal-close" onclick="closeRoadmapModal()">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label class="form-label">Current Credit Score</label>
+        <input type="number" class="form-input" id="roadmap-score" placeholder="e.g., 580" min="300" max="850"/>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Target Score &amp; Goal</label>
+        <input type="text" class="form-input" id="roadmap-goal" placeholder="e.g., 720+ for FHA mortgage approval, 750+ for business credit lines"/>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Current Negative Accounts/Issues</label>
+        <textarea class="form-input" id="roadmap-accounts" placeholder="e.g., 2 collections ($800 LVNV, $1,200 Midland), 3 late payments (Capital One), 1 charge-off, utilization at 85%..."></textarea>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Monthly Gross Income</label>
+        <input type="text" class="form-input" id="roadmap-income" placeholder="e.g., $4,500/month"/>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-secondary" onclick="closeRoadmapModal()">Cancel</button>
+        <button class="btn-primary" onclick="generateRoadmap()">🗺️ Generate Roadmap</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Prompt Library Modal -->
+<div id="prompt-modal" class="modal-overlay">
+  <div class="modal">
+    <div class="modal-header">
+      <h2 style="display:flex;align-items:center;gap:12px;">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="gold" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
+        2026 Supreme Dispute Prompt Library
+        <span class="badge-gold">V17.0 ELITE</span>
+      </h2>
+      <button class="modal-close" onclick="closeModal('prompt-modal')">&times;</button>
+    </div>
+    <div id="prompt-library-tabs" class="prompt-tabs">
+      <!-- Tabs added via JS -->
+    </div>
+    <div id="prompt-library-content" class="prompt-list">
+      <!-- Prompts added via JS -->
+    </div>
+  </div>
+</div>
+
+<!-- Context Menu -->
+<div id="context-menu"></div>
+
+<!-- Toast Container -->
+<div id="toast-container"></div>
+
+<!-- External Libraries -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/dompurify@3.1.5/dist/purify.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script>
+  if(typeof pdfjsLib!=='undefined') pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+  if(typeof marked!=='undefined') marked.setOptions({breaks:true,gfm:true});
+</script>
+  <script src="prompt_library_2026.js"></script>
+<script src="credit_agi.js"></script>
+</body>
+</html>
