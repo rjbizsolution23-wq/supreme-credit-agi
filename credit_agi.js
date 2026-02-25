@@ -247,14 +247,22 @@ Your primary mission is to force manual human review by creating disputes based 
 3. Detect "FSNFUN" violations (Final Status requiring ACBal=0).
 4. Identify "Zombie Debt" re-aging by debt buyers (15 USC § 623(a)(5)).
 
-AUTONOMOUS MASTER PROTOCOL:
-- When you receive the command "[AUTONOMOUS INTAKE PROTOCOL ACTIVATED]":
-  1. IMMEDIATELY perform a 10-Point Forensic FCRA/Metro 2® Audit.
-  2. FOLLOW with a complete 10-Point Credit Success Roadmap (30/60/90 Day execution plan).
-  3. CONCLUDE by drafting the first set of "Cross-Logic" dispute letters for the identified violations.
-- REPORT-FIRST RULE: Use ONLY the provided report data (RAG context). Bypassing generic user input is mandatory.
-- Structure this as one comprehensive, multi-part master report.
-- Maintain attorney-grade fidelity and e-OSCAR bypass prose throughout.
+IDENTITY EXTRACTION PROTOCOL:
+- Your VERY FIRST TASK when analyzing report data is to extract the consumer identity details:
+  * Full Name
+  * Current Address
+  * Last 4 of SSN (if found)
+  * Date of Birth (if found)
+- ALWAYS use these extracted details to populate letters and audits. NEVER output [CLIENT NAME] or [ADDRESS] if the data is available in the report chunks.
+
+LEGAL & CITATION ELITE STANDARDS:
+- CITATIONS: Every dispute MUST include exact 15 U.S.C. §§ citations.
+- EXAMPLES: Provide real-world "Case Law Interpretations" (e.g., mention that 1681i(a)(1) requires "thorough" investigation, reference 1681n for "Willful Non-Compliance").
+- RECENT: Explicitly reference 2026 standards, H.R. 2808, and the Oct 2025 CFPB rulings.
+
+ULTRA-TRANSPARENCY:
+- You are grounded in a High-Density RAG context. Use the provided [UPLOADED CREDIT REPORT DATA] as your primary source of truth.
+- Show your reasoning: Ensure your internal "Thought Process" (CoT) explains WHY a specific violation was chosen.
 
 Current Focus: ${violations}
 ${clientInfo}
@@ -287,10 +295,22 @@ function renderMessage(role, content, opts={}) {
   let badgeHTML = '';
   if(isAI) {
     badgeHTML = `<span class="msg-model-badge">${modelLabel}</span>`;
-    if(opts.ragUsed) badgeHTML += `<span class="msg-rag-badge">🔍 RAG</span>`;
+    if(opts.ragUsed) badgeHTML += `<button class="msg-rag-badge" onclick="toggleSources(this)">🔍 Sources (${opts.chunks?.length||0})</button>`;
   }
 
-  wrapper.innerHTML = `<div class="message ${role}"><div class="msg-avatar ${role}">${isAI?'⚖️':'👤'}</div><div class="msg-body"><div class="msg-meta"><span class="msg-author">${isAI?'Supreme Credit AGI':'You'}</span><span class="msg-time">${now}</span>${badgeHTML}</div><div class="msg-content" id="msg-${Date.now()}-${Math.random().toString(36).slice(2,6)}"></div><div class="msg-actions">${isAI?`<button class="msg-action-btn" onclick="copyMsg(this)">📋 Copy</button><button class="msg-action-btn" onclick="regenMsg(this)">🔄 Regen</button><button class="msg-action-btn" onclick="exportMsg(this)">💾 Export</button>`:'<button class="msg-action-btn" onclick="copyMsg(this)">📋 Copy</button>'}</div></div></div>`;
+  wrapper.innerHTML = `
+    <div class="message ${role}">
+      <div class="msg-avatar ${role}">${isAI?'⚖️':'👤'}</div>
+      <div class="msg-body">
+        <div class="msg-meta">
+          <span class="msg-author">${isAI?'Supreme Credit AGI':'You'}</span>
+          <span class="msg-time">${now}</span>${badgeHTML}
+        </div>
+        <div class="msg-content" id="msg-${Date.now()}-${Math.random().toString(36).slice(2,6)}"></div>
+        ${opts.chunks ? `<div class="msg-sources hidden"><div class="sources-header">Retrieved Report Chunks:</div>${opts.chunks.map((c,i)=>`<div class="source-item"><strong>[Chunk ${i+1}] ${c.source}:</strong> ${escapeHtml(c.text.slice(0,300))}...</div>`).join('')}</div>` : ''}
+        <div class="msg-actions">${isAI?`<button class="msg-action-btn" onclick="copyMsg(this)">📋 Copy</button><button class="msg-action-btn" onclick="regenMsg(this)">🔄 Regen</button><button class="msg-action-btn" onclick="exportMsg(this)">💾 Export</button>`:'<button class="msg-action-btn" onclick="copyMsg(this)">📋 Copy</button>'}</div>
+      </div>
+    </div>`;
 
   if(opts.image) {
     const img = el('img','msg-image');
@@ -414,15 +434,18 @@ async function sendMessage(override, regen=false) {
   const sendBtn = $('btn-send'); sendBtn.classList.add('streaming'); sendBtn.innerHTML='<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><rect x="5" y="5" width="14" height="14" rx="2"/></svg>';
 
   // RAG retrieval
-  let ragContext=''; let ragUsed=false;
+  let ragContext=''; let ragUsed=false; let retrievedChunks=[];
   if(STATE.ragEnabled && STATE.ragChunks.length && text) {
     const isElite = text.includes('[AUTONOMOUS INTAKE PROTOCOL ACTIVATED]') || text.includes('[ACTIVATE METRO 2® ELITE PROTOCOL:');
-    const relevant = isElite ? retrieveHighDensityRAG(50) : retrieveRAG(text, 5);
-    if(relevant.length) { 
-      ragContext=`\n\n[UPLOADED CREDIT REPORT DATA - PRIORITY SOURCE]\n${relevant.map((c,i)=>`[Chunk ${i+1}] ${c.text}`).join('\n\n')}\n[END REPORT DATA]\n`; 
+    retrievedChunks = isElite ? retrieveHighDensityRAG(50) : retrieveRAG(text, 5);
+    if(retrievedChunks.length) { 
+      ragContext=`\n\n[UPLOADED CREDIT REPORT DATA - PRIORITY SOURCE]\n${retrievedChunks.map((c,i)=>`[Chunk ${i+1}] ${c.text}`).join('\n\n')}\n[END REPORT DATA]\n`; 
       ragUsed=true; 
     }
   }
+
+  // Pass chunks to renderMessage via opts
+  STATE.currentChunks = retrievedChunks; 
 
   // Orchestrate
   try {
@@ -445,7 +468,7 @@ async function orchestrate(userText, ragContext, ragUsed) {
     const [m1,m2] = [STATE.model, MODELS[1]?.id||STATE.model];
     const [r1,r2] = await Promise.all([callGeminiRaw(userText,ragContext,m1), callGeminiRaw(userText,ragContext,m2)]);
     const merged = await mergeResponses(userText,r1,r2,m1,m2);
-    const contentEl = renderMessage('ai','',{streaming:true,ragUsed});
+    const contentEl = renderMessage('ai','',{streaming:true,ragUsed,chunks:STATE.currentChunks});
     renderContent(contentEl, merged);
     STATE.messages.push({ role:'model', content:merged });
     hideTyping(); scrollToBottom();
@@ -453,7 +476,7 @@ async function orchestrate(userText, ragContext, ragUsed) {
     const models = [STATE.model, MODELS[1]?.id, MODELS[2]?.id].filter(Boolean);
     const responses = await Promise.all(models.map(m=>callGeminiRaw(userText,ragContext,m)));
     const merged = await mergeMultiple(userText, responses, models);
-    const contentEl = renderMessage('ai','',{streaming:true,ragUsed});
+    const contentEl = renderMessage('ai','',{streaming:true,ragUsed,chunks:STATE.currentChunks});
     renderContent(contentEl, merged);
     STATE.messages.push({ role:'model', content:merged });
     hideTyping(); scrollToBottom();
@@ -505,10 +528,10 @@ async function callGemini(userText, ragCtx='', ragUsed=false, model=STATE.model)
     const text = data.candidates?.[0]?.content?.parts?.[0]?.text||'';
     const thought = data.candidates?.[0]?.content?.parts?.[0]?.thought||'';
     STATE.messages.push({role:'model',content:text,thought:thought});
-    renderMessage('ai',text,{ragUsed, thought:thought}); scrollToBottom(); return;
+    renderMessage('ai',text,{ragUsed, thought:thought, chunks:STATE.currentChunks}); scrollToBottom(); return;
   }
 
-  const contentEl = renderMessage('ai','',{streaming:true,ragUsed});
+  const contentEl = renderMessage('ai','',{streaming:true,ragUsed,chunks:STATE.currentChunks});
   const res = await fetch(url,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body),signal:controller.signal});
       if(!res.ok) {
         const errText = await res.text();
@@ -615,11 +638,12 @@ async function runAutonomousIntake() {
 
   const intakeInstruction = `[AUTONOMOUS INTAKE PROTOCOL ACTIVATED]
 
-Phase 1: Forensic FCRA/Metro 2® 10-Point Audit
-Phase 2: Complete 10-Point Credit Success Roadmap
-Phase 3: Initial Cross-Logic Dispute Strategy & Drafts
+Step 0: Extract Consumer Identity (Name, Address, SSN, DOB) from the report data.
+Phase 1: Forensic FCRA/Metro 2® 10-Point Audit with granular legal citations.
+Phase 2: Complete 10-Point Credit Success Roadmap (30/60/90 Day execution plan).
+Phase 3: Initial Cross-Logic Dispute Strategy & Drafts (Pre-filled with identity details).
 
-Task: Analyze the newly uploaded report data and perform all three phases above sequentially and comprehensively. Use your full MRT ELITE capabilities.`;
+Task: Analyze the newly uploaded report data. Perform all steps sequentially. Show your deep-thinking process and use your full MRT ELITE capabilities. Output MUST be error-free and production-ready.`;
 
   // Wait a moment for UI to settle
   setTimeout(() => sendMessage(intakeInstruction), 1000);
@@ -1045,4 +1069,9 @@ function initPromptLibrary() {
 }
 function closeModal(id) {
   $(id).classList.remove('open');
+}
+
+function toggleSources(btn) {
+  const sources = btn.closest('.msg-body').querySelector('.msg-sources');
+  if (sources) sources.classList.toggle('hidden');
 }
