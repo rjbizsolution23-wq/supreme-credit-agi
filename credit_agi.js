@@ -308,7 +308,16 @@ function renderMessage(role, content, opts={}) {
         </div>
         <div class="msg-content" id="msg-${Date.now()}-${Math.random().toString(36).slice(2,6)}"></div>
         ${opts.chunks ? `<div class="msg-sources hidden"><div class="sources-header">Retrieved Report Chunks:</div>${opts.chunks.map((c,i)=>`<div class="source-item"><strong>[Chunk ${i+1}] ${c.source}:</strong> ${escapeHtml(c.text.slice(0,300))}...</div>`).join('')}</div>` : ''}
-        <div class="msg-actions">${isAI?`<button class="msg-action-btn" onclick="copyMsg(this)">📋 Copy</button><button class="msg-action-btn" onclick="regenMsg(this)">🔄 Regen</button><button class="msg-action-btn" onclick="exportMsg(this)">💾 Export</button>`:'<button class="msg-action-btn" onclick="copyMsg(this)">📋 Copy</button>'}</div>
+        <div class="msg-actions">
+          ${isAI ? `
+            <button class="msg-action-btn" onclick="copyMsg(this)">📋 Copy</button>
+            <button class="msg-action-btn" onclick="generatePDF(this)">💾 PDF</button>
+            <button class="msg-action-btn" onclick="regenMsg(this)">🔄 Regen</button>
+            <button class="msg-action-btn" onclick="exportMsg(this)">📄 TXT</button>
+          ` : `
+            <button class="msg-action-btn" onclick="copyMsg(this)">📋 Copy</button>
+          `}
+        </div>
       </div>
     </div>`;
 
@@ -1074,4 +1083,44 @@ function closeModal(id) {
 function toggleSources(btn) {
   const sources = btn.closest('.msg-body').querySelector('.msg-sources');
   if (sources) sources.classList.toggle('hidden');
+}
+
+async function generatePDF(btn) {
+  const { jsPDF } = window.jspdf;
+  if (!jsPDF) { showToast('PDF library not loaded', 'error'); return; }
+  
+  const content = btn.closest('.msg-body').querySelector('.msg-content').innerText;
+  const doc = new jsPDF();
+  
+  showToast('Generating Attorney-Grade PDF...', 'info');
+  
+  // Professional Header
+  doc.setFontSize(18);
+  doc.setTextColor(20, 30, 60); // Dark Blue
+  doc.text('SUPREME CREDIT MASTER AGI - V17.2', 15, 20);
+  
+  doc.setFontSize(10);
+  doc.setTextColor(100, 100, 100);
+  doc.text(`Official Dispute Submission | Generated: ${new Date().toLocaleString()}`, 15, 26);
+  doc.text('Powered by Rick Jefferson | RJ Business Solutions', 15, 31);
+  
+  doc.line(15, 35, 195, 35); // Horizontal divider
+  
+  // Content
+  doc.setFontSize(11);
+  doc.setTextColor(0, 0, 0);
+  
+  const splitText = doc.splitTextToSize(content, 180);
+  doc.text(splitText, 15, 45);
+  
+  // Footer
+  const pageCount = doc.internal.getNumberOfPages();
+  for (let i = 1; i <= pageCount; i++) {
+    doc.setPage(i);
+    doc.setFontSize(8);
+    doc.text(`Page ${i} of ${pageCount} | rickjeffersonsolutions.com`, 105, 285, { align: 'center' });
+  }
+  
+  doc.save(`Supreme_Credit_AGI_Dispute_${Date.now()}.pdf`);
+  showToast('PDF Downloaded Successfully', 'success');
 }
